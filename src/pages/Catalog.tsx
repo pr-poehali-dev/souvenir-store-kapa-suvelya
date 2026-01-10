@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import {
@@ -9,67 +9,50 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 
+interface Product {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  price: number;
+  material: string;
+  image_url: string;
+  in_stock: boolean;
+}
+
 export default function Catalog() {
   const [category, setCategory] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const products = [
-    {
-      id: 1,
-      name: 'Кружка из капа берёзы',
-      category: 'cups',
-      price: 3500,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/ed9e1c46-b440-4acf-b0e7-bcbf147d5f95.jpg',
-      material: 'Кап берёзы',
-    },
-    {
-      id: 2,
-      name: 'Чаша из сувеля',
-      category: 'bowls',
-      price: 5200,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/7b971dbb-1606-4192-81a8-7d1c5f6e5452.jpg',
-      material: 'Сувель берёзы',
-    },
-    {
-      id: 3,
-      name: 'Шкатулка малая',
-      category: 'boxes',
-      price: 4800,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/ed9e1c46-b440-4acf-b0e7-bcbf147d5f95.jpg',
-      material: 'Кап берёзы',
-    },
-    {
-      id: 4,
-      name: 'Кружка из сувеля',
-      category: 'cups',
-      price: 3800,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/ed9e1c46-b440-4acf-b0e7-bcbf147d5f95.jpg',
-      material: 'Сувель берёзы',
-    },
-    {
-      id: 5,
-      name: 'Чаша большая из капа',
-      category: 'bowls',
-      price: 6500,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/7b971dbb-1606-4192-81a8-7d1c5f6e5452.jpg',
-      material: 'Кап берёзы',
-    },
-    {
-      id: 6,
-      name: 'Шкатулка большая',
-      category: 'boxes',
-      price: 7200,
-      image: 'https://cdn.poehali.dev/projects/54c27d0e-ba02-43f0-856f-eb66f8a51a27/files/ed9e1c46-b440-4acf-b0e7-bcbf147d5f95.jpg',
-      material: 'Сувель берёзы',
-    },
-  ];
+  useEffect(() => {
+    fetchProducts();
+  }, [category]);
 
-  const filteredProducts =
-    category === 'all'
-      ? products
-      : products.filter((p) => p.category === category);
+  const fetchProducts = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const url = new URL('https://functions.poehali.dev/21ca6865-cf59-41ac-a124-6bb6cb259292');
+      if (category !== 'all') {
+        url.searchParams.set('category', category);
+      }
+      
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error('Ошибка загрузки товаров');
+      
+      const data = await response.json();
+      setProducts(data.products || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка загрузки');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
+  const sortedProducts = [...products].sort((a, b) => {
     if (sortBy === 'price-asc') return a.price - b.price;
     if (sortBy === 'price-desc') return b.price - a.price;
     return 0;
@@ -90,6 +73,9 @@ export default function Catalog() {
               <SelectItem value="cups">Кружки</SelectItem>
               <SelectItem value="bowls">Чаши</SelectItem>
               <SelectItem value="boxes">Шкатулки</SelectItem>
+              <SelectItem value="accessories">Аксессуары</SelectItem>
+              <SelectItem value="decor">Декор</SelectItem>
+              <SelectItem value="kitchen">Кухня</SelectItem>
             </SelectContent>
           </Select>
 
@@ -105,41 +91,60 @@ export default function Catalog() {
           </Select>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {sortedProducts.map((product) => (
-            <Card
-              key={product.id}
-              className="overflow-hidden hover:shadow-xl transition-shadow"
-            >
-              <div className="aspect-square overflow-hidden bg-muted">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
-                <p className="text-sm text-muted-foreground mb-3">
-                  {product.material}
-                </p>
-                <div className="flex items-center justify-between">
-                  <span className="text-xl font-bold text-primary">
-                    {product.price.toLocaleString('ru-RU')} ₽
-                  </span>
-                  <Button size="sm">Заказать</Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {sortedProducts.length === 0 && (
+        {loading && (
           <div className="text-center py-12">
-            <p className="text-lg text-muted-foreground">
-              Товары не найдены. Попробуйте изменить фильтры.
-            </p>
+            <p className="text-lg text-muted-foreground">Загрузка товаров...</p>
           </div>
+        )}
+
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-lg text-destructive">Ошибка: {error}</p>
+            <Button onClick={fetchProducts} className="mt-4">
+              Попробовать снова
+            </Button>
+          </div>
+        )}
+
+        {!loading && !error && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {sortedProducts.map((product) => (
+                <Card
+                  key={product.id}
+                  className="overflow-hidden hover:shadow-xl transition-shadow"
+                >
+                  <div className="aspect-square overflow-hidden bg-muted">
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {product.material}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-bold text-primary">
+                        {product.price.toLocaleString('ru-RU')} ₽
+                      </span>
+                      <Button size="sm">Заказать</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {sortedProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-lg text-muted-foreground">
+                  Товары не найдены. Попробуйте изменить фильтры.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
