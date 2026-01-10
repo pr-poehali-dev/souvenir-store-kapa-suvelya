@@ -15,6 +15,7 @@ export default function Header() {
     { path: '/blog', label: 'Блог' },
     { path: '/delivery', label: 'Доставка' },
     { path: '/contacts', label: 'Контакты' },
+    { path: '/admin', label: 'Админка' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
