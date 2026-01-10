@@ -34,8 +34,8 @@ export default function Header() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(item.path) ? 'text-primary' : 'text-muted-foreground'
+                className={`text-sm font-medium transition-colors hover:text-primary pb-1 ${
+                  isActive(item.path) ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground'
                 }`}
               >
                 {item.label}
@@ -60,8 +60,8 @@ export default function Header() {
                 key={item.path}
                 to={item.path}
                 onClick={() => setIsMenuOpen(false)}
-                className={`block py-2 text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(item.path) ? 'text-primary' : 'text-muted-foreground'
+                className={`block py-2 text-sm font-medium transition-colors hover:text-primary border-l-4 pl-3 ${
+                  isActive(item.path) ? 'text-primary border-primary' : 'text-muted-foreground border-transparent'
                 }`}
               >
                 {item.label}
