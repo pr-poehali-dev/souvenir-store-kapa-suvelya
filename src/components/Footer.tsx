@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Icon name="TreeDeciduous" size={24} className="text-primary" />
-              <span className="font-bold text-lg">Природный Сувенир</span>
+              <span className="font-bold text-lg">Деревянные Узоры</span>
             </div>
             <p className="text-sm text-muted-foreground">
               Уникальные изделия ручной работы из капа и сувеля
@@ -78,7 +78,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Природный Сувенир. Все права защищены.</p>
+          <p>&copy; {new Date().getFullYear()} Деревянные Узоры. Все права защищены.</p>
         </div>
       </div>
     </footer>
