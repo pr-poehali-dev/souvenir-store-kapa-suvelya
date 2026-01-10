@@ -1,0 +1,22 @@
+{
+  "tests": [
+    {
+      "name": "Get all products for admin",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Create new product",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Test Product",
+        "category": "cups",
+        "price": 5000,
+        "material": "Кап берёзы"
+      },
+      "expectedStatus": 201
+    }
+  ]
+}
