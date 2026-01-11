@@ -39,7 +39,7 @@ def handler(event: dict, context) -> dict:
         conn = psycopg2.connect(os.environ['DATABASE_URL'])
         cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        query = 'SELECT id, name, description, category, price, material, image_url, in_stock FROM products WHERE 1=1'
+        query = 'SELECT id, name, description, category, price, material, image_url, images, in_stock FROM products WHERE 1=1'
         
         if category and category != 'all':
             query += f" AND category = '{category}'"

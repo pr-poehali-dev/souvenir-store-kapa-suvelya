@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import Icon from '@/components/ui/icon';
 import {
   Select,
   SelectContent,
@@ -17,6 +19,7 @@ interface Product {
   price: number;
   material: string;
   image_url: string;
+  images: string[];
   in_stock: boolean;
 }
 
@@ -26,6 +29,8 @@ export default function Catalog() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
     fetchProducts();
@@ -112,14 +117,23 @@ export default function Catalog() {
               {sortedProducts.map((product) => (
                 <Card
                   key={product.id}
-                  className="overflow-hidden hover:shadow-xl transition-shadow"
+                  className="overflow-hidden hover:shadow-xl transition-shadow cursor-pointer"
+                  onClick={() => {
+                    setSelectedProduct(product);
+                    setCurrentImageIndex(0);
+                  }}
                 >
-                  <div className="aspect-square overflow-hidden bg-muted">
+                  <div className="aspect-square overflow-hidden bg-muted relative">
                     <img
-                      src={product.image_url}
+                      src={product.images?.[0] || product.image_url}
                       alt={product.name}
                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     />
+                    {product.images && product.images.length > 1 && (
+                      <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                        +{product.images.length - 1}
+                      </div>
+                    )}
                   </div>
                   <CardContent className="p-4">
                     <h3 className="font-semibold text-lg mb-1">{product.name}</h3>
@@ -130,7 +144,9 @@ export default function Catalog() {
                       <span className="text-xl font-bold text-primary">
                         {product.price.toLocaleString('ru-RU')} ₽
                       </span>
-                      <Button size="sm">Заказать</Button>
+                      <Button size="sm" onClick={(e) => {
+                        e.stopPropagation();
+                      }}>Заказать</Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -147,6 +163,89 @@ export default function Catalog() {
           </>
         )}
       </div>
+
+      {/* Модальное окно галереи */}
+      <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{selectedProduct?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedProduct && (
+            <div className="space-y-4">
+              {/* Основное изображение */}
+              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+                <img
+                  src={selectedProduct.images?.[currentImageIndex] || selectedProduct.image_url}
+                  alt={selectedProduct.name}
+                  className="w-full h-full object-contain"
+                />
+                
+                {/* Навигация между фото */}
+                {selectedProduct.images && selectedProduct.images.length > 1 && (
+                  <>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute left-2 top-1/2 -translate-y-1/2"
+                      onClick={() => setCurrentImageIndex((prev) => 
+                        prev === 0 ? selectedProduct.images.length - 1 : prev - 1
+                      )}
+                    >
+                      <Icon name="ChevronLeft" size={24} />
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="icon"
+                      className="absolute right-2 top-1/2 -translate-y-1/2"
+                      onClick={() => setCurrentImageIndex((prev) => 
+                        prev === selectedProduct.images.length - 1 ? 0 : prev + 1
+                      )}
+                    >
+                      <Icon name="ChevronRight" size={24} />
+                    </Button>
+                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/70 text-white text-sm px-3 py-1 rounded">
+                      {currentImageIndex + 1} / {selectedProduct.images.length}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Миниатюры */}
+              {selectedProduct.images && selectedProduct.images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto">
+                  {selectedProduct.images.map((img, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentImageIndex(idx)}
+                      className={`flex-shrink-0 w-20 h-20 rounded border-2 overflow-hidden ${
+                        currentImageIndex === idx ? 'border-primary' : 'border-transparent'
+                      }`}
+                    >
+                      <img src={img} alt={`Фото ${idx + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Описание товара */}
+              <div className="space-y-2">
+                <p className="text-muted-foreground">{selectedProduct.description}</p>
+                <p className="text-sm"><strong>Материал:</strong> {selectedProduct.material}</p>
+                <p className="text-sm"><strong>Категория:</strong> {selectedProduct.category}</p>
+                <div className="flex items-center justify-between pt-4">
+                  <span className="text-3xl font-bold text-primary">
+                    {selectedProduct.price.toLocaleString('ru-RU')} ₽
+                  </span>
+                  <Button size="lg">
+                    <Icon name="ShoppingCart" size={20} className="mr-2" />
+                    Заказать
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

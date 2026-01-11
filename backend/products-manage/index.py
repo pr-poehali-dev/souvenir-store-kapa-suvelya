@@ -49,12 +49,16 @@ def handler(event: dict, context) -> dict:
         elif method == 'POST':
             body = json.loads(event.get('body', '{}'))
             
+            images = body.get('images', [])
+            if not images and body.get('image_url'):
+                images = [body['image_url']]
+            
             cursor.execute(
-                '''INSERT INTO products (name, description, category, price, material, image_url, in_stock) 
-                   VALUES (%s, %s, %s, %s, %s, %s, %s) RETURNING id''',
+                '''INSERT INTO products (name, description, category, price, material, image_url, images, in_stock) 
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s) RETURNING id''',
                 (body['name'], body.get('description', ''), body['category'], 
-                 body['price'], body.get('material', ''), body.get('image_url', ''), 
-                 body.get('in_stock', True))
+                 body['price'], body.get('material', ''), body.get('image_url', ''),
+                 images, body.get('in_stock', True))
             )
             product_id = cursor.fetchone()['id']
             conn.commit()
@@ -78,14 +82,18 @@ def handler(event: dict, context) -> dict:
                     'isBase64Encoded': False
                 }
             
+            images = body.get('images', [])
+            if not images and body.get('image_url'):
+                images = [body['image_url']]
+            
             cursor.execute(
                 '''UPDATE products 
                    SET name = %s, description = %s, category = %s, price = %s, 
-                       material = %s, image_url = %s, in_stock = %s, updated_at = CURRENT_TIMESTAMP
+                       material = %s, image_url = %s, images = %s, in_stock = %s, updated_at = CURRENT_TIMESTAMP
                    WHERE id = %s''',
                 (body['name'], body.get('description', ''), body['category'], 
-                 body['price'], body.get('material', ''), body.get('image_url', ''), 
-                 body.get('in_stock', True), product_id)
+                 body['price'], body.get('material', ''), body.get('image_url', ''),
+                 images, body.get('in_stock', True), product_id)
             )
             conn.commit()
             

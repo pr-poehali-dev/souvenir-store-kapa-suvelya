@@ -29,6 +29,7 @@ interface Product {
   price: number;
   material: string;
   image_url: string;
+  images: string[];
   in_stock: boolean;
 }
 
@@ -49,6 +50,7 @@ export default function Admin() {
     price: 0,
     material: '',
     image_url: '',
+    images: [] as string[],
     in_stock: true,
   });
 
@@ -140,6 +142,7 @@ export default function Admin() {
       price: product.price,
       material: product.material,
       image_url: product.image_url,
+      images: product.images || [],
       in_stock: product.in_stock,
     });
     setIsDialogOpen(true);
@@ -154,6 +157,7 @@ export default function Admin() {
       price: 0,
       material: '',
       image_url: '',
+      images: [],
       in_stock: true,
     });
   };
@@ -225,7 +229,8 @@ export default function Admin() {
       if (!response.ok) throw new Error('Ошибка загрузки');
 
       const data = await response.json();
-      setFormData({ ...formData, image_url: data.url });
+      const newImages = [...formData.images, data.url];
+      setFormData({ ...formData, images: newImages, image_url: newImages[0] || '' });
       
       toast({
         title: 'Успешно',
@@ -324,16 +329,9 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <Label htmlFor="image_url">Изображение товара</Label>
-                  <div className="space-y-2">
-                    <Input
-                      id="image_url"
-                      value={formData.image_url}
-                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                      placeholder="URL изображения"
-                    />
+                  <Label>Изображения товара</Label>
+                  <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-muted-foreground">или</span>
                       <Button
                         type="button"
                         variant="outline"
@@ -341,8 +339,8 @@ export default function Admin() {
                         disabled={uploadingImage}
                         onClick={() => document.getElementById('file-upload')?.click()}
                       >
-                        <Icon name={uploadingImage ? 'Loader2' : 'Upload'} size={16} className={`mr-2 ${uploadingImage ? 'animate-spin' : ''}`} />
-                        {uploadingImage ? 'Загрузка...' : 'Загрузить с компьютера'}
+                        <Icon name={uploadingImage ? 'Loader2' : 'Plus'} size={16} className={`mr-2 ${uploadingImage ? 'animate-spin' : ''}`} />
+                        {uploadingImage ? 'Загрузка...' : 'Добавить фото'}
                       </Button>
                       <input
                         id="file-upload"
@@ -351,10 +349,38 @@ export default function Admin() {
                         className="hidden"
                         onChange={handleImageUpload}
                       />
+                      <span className="text-sm text-muted-foreground">
+                        {formData.images.length > 0 ? `Загружено: ${formData.images.length}` : 'Загрузите фото'}
+                      </span>
                     </div>
-                    {formData.image_url && (
-                      <div className="mt-2">
-                        <img src={formData.image_url} alt="Preview" className="max-w-[200px] max-h-[200px] w-auto h-auto object-contain rounded border" />
+                    
+                    {formData.images.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2">
+                        {formData.images.map((url, index) => (
+                          <div key={index} className="relative group">
+                            <img 
+                              src={url} 
+                              alt={`Фото ${index + 1}`} 
+                              className="w-full h-24 object-cover rounded border"
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => {
+                                const newImages = formData.images.filter((_, i) => i !== index);
+                                setFormData({ 
+                                  ...formData, 
+                                  images: newImages,
+                                  image_url: newImages[0] || ''
+                                });
+                              }}
+                            >
+                              <Icon name="X" size={14} />
+                            </Button>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
