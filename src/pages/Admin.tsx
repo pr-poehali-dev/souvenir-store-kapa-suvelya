@@ -354,7 +354,7 @@ export default function Admin() {
                     </div>
                     {formData.image_url && (
                       <div className="mt-2">
-                        <img src={formData.image_url} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                        <img src={formData.image_url} alt="Preview" className="max-w-[200px] max-h-[200px] w-auto h-auto object-contain rounded border" />
                       </div>
                     )}
                   </div>
