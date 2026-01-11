@@ -1,10 +1,7 @@
-import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
 
   const navItems = [
@@ -29,7 +26,7 @@ export default function Header() {
             <span className="text-xl font-bold text-foreground">Деревянные Узоры</span>
           </Link>
 
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="flex items-center space-x-6">
             {navItems.map((item) => (
               <Link
                 key={item.path}
@@ -42,33 +39,7 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <Icon name={isMenuOpen ? 'X' : 'Menu'} size={24} />
-          </Button>
         </div>
-
-        {isMenuOpen && (
-          <nav className="md:hidden pb-4 space-y-2">
-            {navItems.map((item) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                onClick={() => setIsMenuOpen(false)}
-                className={`block py-2 text-sm font-medium transition-colors hover:text-primary border-l-4 pl-3 ${
-                  isActive(item.path) ? 'text-primary border-primary' : 'text-muted-foreground border-transparent'
-                }`}
-              >
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
       </div>
     </header>
   );
