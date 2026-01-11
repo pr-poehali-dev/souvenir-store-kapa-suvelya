@@ -39,6 +39,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -162,6 +163,54 @@ export default function Admin() {
     if (!open) resetForm();
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: 'Ошибка',
+        description: 'Выберите файл изображения',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        
+        const response = await fetch('https://functions.poehali.dev/626b2c40-69c8-46c4-bea2-756b581221df', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64 }),
+        });
+
+        if (!response.ok) throw new Error('Ошибка загрузки');
+
+        const data = await response.json();
+        setFormData({ ...formData, image_url: data.url });
+        
+        toast({
+          title: 'Успешно',
+          description: 'Изображение загружено',
+        });
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      toast({
+        title: 'Ошибка',
+        description: 'Не удалось загрузить изображение',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   return (
     <div className="py-12">
       <div className="container mx-auto px-4">
@@ -244,12 +293,40 @@ export default function Admin() {
                 </div>
 
                 <div>
-                  <Label htmlFor="image_url">URL изображения</Label>
-                  <Input
-                    id="image_url"
-                    value={formData.image_url}
-                    onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  />
+                  <Label htmlFor="image_url">Изображение товара</Label>
+                  <div className="space-y-2">
+                    <Input
+                      id="image_url"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                      placeholder="URL изображения"
+                    />
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground">или</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingImage}
+                        onClick={() => document.getElementById('file-upload')?.click()}
+                      >
+                        <Icon name={uploadingImage ? 'Loader2' : 'Upload'} size={16} className={`mr-2 ${uploadingImage ? 'animate-spin' : ''}`} />
+                        {uploadingImage ? 'Загрузка...' : 'Загрузить с компьютера'}
+                      </Button>
+                      <input
+                        id="file-upload"
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handleImageUpload}
+                      />
+                    </div>
+                    {formData.image_url && (
+                      <div className="mt-2">
+                        <img src={formData.image_url} alt="Preview" className="w-32 h-32 object-cover rounded" />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex items-center space-x-2">
