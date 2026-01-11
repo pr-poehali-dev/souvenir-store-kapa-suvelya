@@ -179,27 +179,58 @@ export default function Admin() {
     setUploadingImage(true);
 
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64 = reader.result as string;
+      // Сжимаем изображение до максимум 800px
+      const compressedBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+            
+            // Ограничиваем максимальный размер
+            const maxSize = 800;
+            if (width > maxSize || height > maxSize) {
+              if (width > height) {
+                height = (height / width) * maxSize;
+                width = maxSize;
+              } else {
+                width = (width / height) * maxSize;
+                height = maxSize;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            
+            // Конвертируем в JPEG с качеством 0.8
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          };
+          img.onerror = reject;
+          img.src = e.target?.result as string;
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
         
-        const response = await fetch('https://functions.poehali.dev/626b2c40-69c8-46c4-bea2-756b581221df', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ image: base64 }),
-        });
+      const response = await fetch('https://functions.poehali.dev/626b2c40-69c8-46c4-bea2-756b581221df', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: compressedBase64 }),
+      });
 
-        if (!response.ok) throw new Error('Ошибка загрузки');
+      if (!response.ok) throw new Error('Ошибка загрузки');
 
-        const data = await response.json();
-        setFormData({ ...formData, image_url: data.url });
-        
-        toast({
-          title: 'Успешно',
-          description: 'Изображение загружено',
-        });
-      };
-      reader.readAsDataURL(file);
+      const data = await response.json();
+      setFormData({ ...formData, image_url: data.url });
+      
+      toast({
+        title: 'Успешно',
+        description: 'Изображение загружено',
+      });
     } catch (error) {
       toast({
         title: 'Ошибка',
