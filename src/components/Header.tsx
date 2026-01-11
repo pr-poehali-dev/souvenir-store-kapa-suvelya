@@ -35,7 +35,7 @@ export default function Header() {
         </nav>
         <Link to="/" className="flex items-center justify-center space-x-2 py-3 border-t">
           <Icon name="TreeDeciduous" size={28} className="text-primary" />
-          <span className="text-xl font-bold text-foreground">Деревянные Узоры</span>
+          <span className="text-xl font-bold text-foreground">Древесные Узоры</span>
         </Link>
       </div>
     </header>
