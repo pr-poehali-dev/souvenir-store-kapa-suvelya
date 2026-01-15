@@ -166,14 +166,14 @@ export default function Catalog() {
 
       {/* Модальное окно галереи */}
       <Dialog open={!!selectedProduct} onOpenChange={(open) => !open && setSelectedProduct(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{selectedProduct?.name}</DialogTitle>
           </DialogHeader>
           {selectedProduct && (
             <div className="space-y-4">
               {/* Основное изображение */}
-              <div className="relative aspect-square bg-muted rounded-lg overflow-hidden">
+              <div className="relative w-full h-64 md:h-80 bg-muted rounded-lg overflow-hidden">
                 <img
                   src={selectedProduct.images?.[currentImageIndex] || selectedProduct.image_url}
                   alt={selectedProduct.name}
