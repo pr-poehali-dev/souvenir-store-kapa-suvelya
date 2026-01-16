@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import Cart, { CartItem } from '@/components/Cart';
+import Checkout from '@/components/Checkout';
 
 interface Product {
   id: number;
@@ -32,11 +33,19 @@ export default function Catalog() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    const saved = localStorage.getItem('cart');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   useEffect(() => {
     fetchProducts();
   }, [category]);
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -91,6 +100,10 @@ export default function Catalog() {
     setCartItems([]);
   };
 
+  const handleCheckoutSuccess = () => {
+    setCartItems([]);
+  };
+
   return (
     <div className="py-12">
       <div className="container mx-auto px-4">
@@ -101,6 +114,7 @@ export default function Catalog() {
             onUpdateQuantity={updateQuantity}
             onRemove={removeFromCart}
             onClear={clearCart}
+            onCheckout={() => setIsCheckoutOpen(true)}
           />
         </div>
 
@@ -286,6 +300,15 @@ export default function Catalog() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Окно оформления заказа */}
+      <Checkout
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        items={cartItems}
+        total={cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0)}
+        onSuccess={handleCheckoutSuccess}
+      />
     </div>
   );
 }

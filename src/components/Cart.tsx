@@ -23,9 +23,10 @@ interface CartProps {
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemove: (id: number) => void;
   onClear: () => void;
+  onCheckout: () => void;
 }
 
-export default function Cart({ items, onUpdateQuantity, onRemove, onClear }: CartProps) {
+export default function Cart({ items, onUpdateQuantity, onRemove, onClear, onCheckout }: CartProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -104,7 +105,7 @@ export default function Cart({ items, onUpdateQuantity, onRemove, onClear }: Car
                 <span className="text-primary">{total.toLocaleString('ru-RU')} ₽</span>
               </div>
 
-              <Button className="w-full" size="lg">
+              <Button className="w-full" size="lg" onClick={onCheckout}>
                 <Icon name="CreditCard" size={20} className="mr-2" />
                 Оформить заказ
               </Button>
