@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import Cart, { CartItem } from '@/components/Cart';
 
 interface Product {
   id: number;
@@ -31,6 +32,7 @@ export default function Catalog() {
   const [error, setError] = useState<string | null>(null);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
   useEffect(() => {
     fetchProducts();
@@ -63,10 +65,44 @@ export default function Catalog() {
     return 0;
   });
 
+  const addToCart = (product: Product) => {
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
+        return prev.map((item) =>
+          item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item
+        );
+      }
+      return [...prev, { id: product.id, name: product.name, price: product.price, image_url: product.images?.[0] || product.image_url, quantity: 1 }];
+    });
+  };
+
+  const updateQuantity = (id: number, quantity: number) => {
+    setCartItems((prev) =>
+      prev.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
+  const removeFromCart = (id: number) => {
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  const clearCart = () => {
+    setCartItems([]);
+  };
+
   return (
     <div className="py-12">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl md:text-5xl font-bold mb-8">Каталог товаров</h1>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold">Каталог товаров</h1>
+          <Cart
+            items={cartItems}
+            onUpdateQuantity={updateQuantity}
+            onRemove={removeFromCart}
+            onClear={clearCart}
+          />
+        </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <Select value={category} onValueChange={setCategory}>
@@ -146,7 +182,11 @@ export default function Catalog() {
                       </span>
                       <Button size="sm" onClick={(e) => {
                         e.stopPropagation();
-                      }}>Заказать</Button>
+                        addToCart(product);
+                      }}>
+                        <Icon name="ShoppingCart" size={16} className="mr-1" />
+                        В корзину
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -236,9 +276,9 @@ export default function Catalog() {
                   <span className="text-3xl font-bold text-primary">
                     {selectedProduct.price.toLocaleString('ru-RU')} ₽
                   </span>
-                  <Button size="lg">
+                  <Button size="lg" onClick={() => addToCart(selectedProduct)}>
                     <Icon name="ShoppingCart" size={20} className="mr-2" />
-                    Заказать
+                    В корзину
                   </Button>
                 </div>
               </div>
