@@ -1,0 +1,39 @@
+{
+  "tests": [
+    {
+      "name": "Test OPTIONS request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Test payment creation with valid amount",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "amount": 1000,
+        "description": "Test payment",
+        "return_url": "https://example.com/success"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "payment_id": "string",
+        "payment_url": "string",
+        "status": "string"
+      },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Test invalid amount",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "amount": 0
+      },
+      "expectedStatus": 400,
+      "expectedBody": {
+        "error": "Invalid amount"
+      }
+    }
+  ]
+}

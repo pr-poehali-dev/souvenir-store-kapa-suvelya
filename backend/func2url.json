@@ -1,4 +1,5 @@
 {
+  "payment": "https://functions.poehali.dev/8ea3e05b-9e83-4db5-bf94-84f2706415fe",
   "upload-image": "https://functions.poehali.dev/626b2c40-69c8-46c4-bea2-756b581221df",
   "products-manage": "https://functions.poehali.dev/8ff45b75-cb46-41b6-abb0-37ffd148f760",
   "products": "https://functions.poehali.dev/21ca6865-cf59-41ac-a124-6bb6cb259292"
