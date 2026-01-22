@@ -1,0 +1,26 @@
+{
+  "tests": [
+    {
+      "name": "Test OPTIONS request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Test successful payment webhook",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "event": "payment.succeeded",
+        "object": {
+          "id": "test-payment-123",
+          "status": "succeeded"
+        }
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "status": "ok"
+      }
+    }
+  ]
+}

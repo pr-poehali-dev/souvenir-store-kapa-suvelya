@@ -3,6 +3,8 @@ import os
 import uuid
 import requests
 from base64 import b64encode
+import psycopg2
+from psycopg2.extras import Json
 
 def handler(event: dict, context) -> dict:
     '''API для создания платежа через ЮKassa'''
@@ -32,11 +34,24 @@ def handler(event: dict, context) -> dict:
         description = body.get('description', 'Оплата заказа')
         return_url = body.get('return_url', 'https://your-site.com/success')
         
+        customer_name = body.get('customer_name')
+        customer_email = body.get('customer_email')
+        customer_phone = body.get('customer_phone', '')
+        delivery_address = body.get('delivery_address')
+        items = body.get('items', [])
+        
         if not amount or amount <= 0:
             return {
                 'statusCode': 400,
                 'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
                 'body': json.dumps({'error': 'Invalid amount'})
+            }
+        
+        if not customer_name or not customer_email or not delivery_address or not items:
+            return {
+                'statusCode': 400,
+                'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
+                'body': json.dumps({'error': 'Missing required fields: customer_name, customer_email, delivery_address, items'})
             }
         
         shop_id = os.environ.get('YOOKASSA_SHOP_ID')
@@ -86,12 +101,27 @@ def handler(event: dict, context) -> dict:
             }
         
         payment_response = response.json()
+        payment_id = payment_response['id']
+        
+        dsn = os.environ.get('DATABASE_URL')
+        if dsn:
+            conn = psycopg2.connect(dsn)
+            cursor = conn.cursor()
+            cursor.execute(
+                '''INSERT INTO t_p22032142_souvenir_store_kapa_.orders 
+                (payment_id, customer_name, customer_email, customer_phone, delivery_address, items, total_amount, payment_status)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',
+                (payment_id, customer_name, customer_email, customer_phone, delivery_address, Json(items), amount, 'pending')
+            )
+            conn.commit()
+            cursor.close()
+            conn.close()
         
         return {
             'statusCode': 200,
             'headers': {'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*'},
             'body': json.dumps({
-                'payment_id': payment_response['id'],
+                'payment_id': payment_id,
                 'payment_url': payment_response['confirmation']['confirmation_url'],
                 'status': payment_response['status']
             })

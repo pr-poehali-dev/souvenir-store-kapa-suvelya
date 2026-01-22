@@ -13,7 +13,12 @@
       "body": {
         "amount": 1000,
         "description": "Test payment",
-        "return_url": "https://example.com/success"
+        "return_url": "https://example.com/success",
+        "customer_name": "Test User",
+        "customer_email": "test@example.com",
+        "customer_phone": "+79001234567",
+        "delivery_address": "Moscow, Test Street 1",
+        "items": [{"name": "Test Product", "quantity": 1, "price": 1000}]
       },
       "expectedStatus": 200,
       "expectedBody": {
