@@ -25,9 +25,10 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
   const [contactData, setContactData] = useState({ name: '', phone: '', email: '' });
   const [deliveryMethod, setDeliveryMethod] = useState('pickup');
   const [deliveryAddress, setDeliveryAddress] = useState('');
+  const [deliveryZipCode, setDeliveryZipCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
 
-  const deliveryCost = deliveryMethod === 'delivery' ? 500 : 0;
+  const deliveryCost = deliveryMethod === 'delivery' ? 500 : deliveryMethod === 'transport' ? 800 : 0;
   const finalTotal = total + deliveryCost;
 
   const handleNext = () => {
@@ -48,7 +49,7 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
   };
 
   const isContactValid = contactData.name && contactData.phone;
-  const isDeliveryValid = deliveryMethod === 'pickup' || deliveryAddress;
+  const isDeliveryValid = deliveryMethod === 'pickup' || (deliveryMethod === 'delivery' && deliveryAddress) || (deliveryMethod === 'transport' && deliveryAddress && deliveryZipCode);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -130,6 +131,14 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
                   </Label>
                   <Icon name="Truck" size={24} />
                 </div>
+                <div className="flex items-center space-x-2 border rounded p-4">
+                  <RadioGroupItem value="transport" id="transport" />
+                  <Label htmlFor="transport" className="flex-1 cursor-pointer">
+                    <div className="font-semibold">Доставка транспортной компанией</div>
+                    <div className="text-sm text-muted-foreground">800 ₽</div>
+                  </Label>
+                  <Icon name="Package" size={24} />
+                </div>
               </RadioGroup>
 
               {deliveryMethod === 'delivery' && (
@@ -141,6 +150,30 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
                     onChange={(e) => setDeliveryAddress(e.target.value)}
                     placeholder="Улица, дом, квартира"
                   />
+                </div>
+              )}
+
+              {deliveryMethod === 'transport' && (
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="zipcode">Почтовый индекс *</Label>
+                    <Input
+                      id="zipcode"
+                      value={deliveryZipCode}
+                      onChange={(e) => setDeliveryZipCode(e.target.value)}
+                      placeholder="123456"
+                      maxLength={6}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="full-address">Полный адрес доставки *</Label>
+                    <Input
+                      id="full-address"
+                      value={deliveryAddress}
+                      onChange={(e) => setDeliveryAddress(e.target.value)}
+                      placeholder="Город, улица, дом, квартира"
+                    />
+                  </div>
                 </div>
               )}
             </div>
