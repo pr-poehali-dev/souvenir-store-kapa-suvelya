@@ -41,7 +41,31 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
     else if (step === 'delivery') setStep('contact');
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const orderData = {
+      customer_name: contactData.name,
+      customer_phone: contactData.phone,
+      customer_email: contactData.email,
+      delivery_method: deliveryMethod,
+      delivery_address: deliveryMethod !== 'pickup' ? (deliveryZipCode ? `${deliveryZipCode}, ${deliveryAddress}` : deliveryAddress) : '',
+      items: items.map(item => ({
+        name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      })),
+      total_amount: finalTotal
+    };
+
+    try {
+      await fetch('https://functions.poehali.dev/e2ee6839-f40b-44c6-9cd3-d4f01471fb5e', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: orderData })
+      });
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+    }
+
     alert(`Заказ оформлен!\n\nИмя: ${contactData.name}\nТелефон: ${contactData.phone}\nДоставка: ${deliveryMethod === 'pickup' ? 'Самовывоз' : 'Доставка по адресу: ' + deliveryAddress}\nОплата: ${paymentMethod === 'card' ? 'Картой онлайн' : 'При получении'}\nИтого: ${finalTotal.toLocaleString('ru-RU')} ₽`);
     onSuccess();
     onClose();

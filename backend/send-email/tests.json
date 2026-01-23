@@ -1,0 +1,32 @@
+{
+  "tests": [
+    {
+      "name": "Test OPTIONS request",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Test send email with valid data",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "order": {
+          "customer_name": "Иван Петров",
+          "customer_phone": "+7 (999) 123-45-67",
+          "customer_email": "test@example.com",
+          "delivery_method": "pickup",
+          "items": [
+            {"name": "Тестовый товар", "quantity": 1, "price": 5000}
+          ],
+          "total_amount": 5000
+        }
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "success": true
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
