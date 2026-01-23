@@ -1,7 +1,6 @@
 import HeroSection from '@/components/home/HeroSection';
 import FeaturesSection from '@/components/home/FeaturesSection';
 import PopularProductsSection from '@/components/home/PopularProductsSection';
-import MaterialsSection from '@/components/home/MaterialsSection';
 
 export default function Home() {
   return (
@@ -9,7 +8,6 @@ export default function Home() {
       <HeroSection />
       <FeaturesSection />
       <PopularProductsSection />
-      <MaterialsSection />
     </div>
   );
 }
