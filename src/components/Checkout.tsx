@@ -28,7 +28,7 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
   const [deliveryZipCode, setDeliveryZipCode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
 
-  const deliveryCost = deliveryMethod === 'delivery' ? 500 : deliveryMethod === 'transport' ? 800 : 0;
+  const deliveryCost = deliveryMethod === 'delivery' ? 500 : 0;
   const finalTotal = total + deliveryCost;
 
   const handleNext = () => {
@@ -135,7 +135,7 @@ export default function Checkout({ isOpen, onClose, items, total, onSuccess }: C
                   <RadioGroupItem value="transport" id="transport" />
                   <Label htmlFor="transport" className="flex-1 cursor-pointer">
                     <div className="font-semibold">Доставка транспортной компанией</div>
-                    <div className="text-sm text-muted-foreground">800 ₽</div>
+                    <div className="text-sm text-muted-foreground">Оплата при получении в ТК</div>
                   </Label>
                   <Icon name="Package" size={24} />
                 </div>
